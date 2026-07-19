@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="40" fill="#f4efe2"/>
+  <circle cx="96" cy="96" r="62" fill="#ffffff" stroke="#3f6b4f" stroke-width="6"/>
+  <circle cx="96" cy="96" r="46" fill="none" stroke="#c8523f" stroke-width="7" stroke-dasharray="4 7" transform="rotate(-14 96 96)"/>
+  <text x="96" y="106" text-anchor="middle" font-family="'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif" font-weight="900" font-size="34" fill="#c8523f" transform="rotate(-14 96 96)">済</text>
+</svg>

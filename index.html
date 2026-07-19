@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スタンプラリー チェックリスト</title>
+<meta name="theme-color" content="#3f6b4f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="スタンプラリー">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #ffffff;
+    --panel: #f4efe2;
+    --panel-line: #e6dcc4;
+    --ink: #33301f;
+    --sub-ink: #7a765f;
+    --green-deep: #3f6b4f;
+    --green-mid: #6f9d7c;
+    --stamp-red: #c8523f;
+    --stamp-red-dark: #a7402f;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans JP", sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:560px;
+    margin:0 auto;
+    padding:28px 18px 80px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:0.28em;
+    color:var(--green-deep);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:"Zen Maru Gothic", sans-serif;
+    font-weight:900;
+    font-size:28px;
+    margin:0 0 4px;
+    color:var(--ink);
+  }
+  .rally-name-input{
+    font-family:"Zen Maru Gothic", sans-serif;
+    font-weight:700;
+    font-size:22px;
+    text-align:center;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    width:100%;
+    padding:4px 8px;
+    border-bottom:2px dashed transparent;
+    transition:border-color .15s;
+  }
+  .rally-name-input:focus{
+    outline:none;
+    border-bottom:2px dashed var(--green-mid);
+  }
+  .rally-name-input::placeholder{ color:var(--sub-ink); }
+
+  /* 進捗 */
+  .progress-card{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:16px;
+    padding:16px 18px;
+    margin-bottom:20px;
+  }
+  .progress-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:10px;
+  }
+  .progress-label{
+    font-size:13px;
+    color:var(--sub-ink);
+    font-weight:500;
+  }
+  .progress-count{
+    font-family:"Zen Maru Gothic", sans-serif;
+    font-weight:900;
+    font-size:20px;
+    color:var(--green-deep);
+  }
+  .progress-count span{
+    font-size:13px;
+    font-weight:500;
+    color:var(--sub-ink);
+    margin-left:2px;
+  }
+  .progress-track{
+    height:10px;
+    background:#e8e2cf;
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--green-mid), var(--green-deep));
+    border-radius:99px;
+    transition:width .35s ease;
+  }
+  .complete-msg{
+    display:none;
+    margin-top:10px;
+    font-size:13px;
+    color:var(--green-deep);
+    font-weight:700;
+    text-align:center;
+  }
+  .complete-msg.show{ display:block; }
+
+  /* リスト */
+  .list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .stamp-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--bg);
+    border:1px solid var(--panel-line);
+    border-radius:14px;
+    padding:12px 12px 12px 10px;
+    transition:background .15s, border-color .15s;
+  }
+  .stamp-item.checked{
+    background: #fbf8f0;
+    border-color: var(--green-mid);
+  }
+  .stamp-btn{
+    flex:0 0 auto;
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    border:2.5px solid #d8d2ba;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    position:relative;
+    transition:border-color .15s, transform .15s;
+  }
+  .stamp-btn:hover{ transform:scale(1.04); }
+  .stamp-btn .mark{
+    font-family:"Zen Maru Gothic", sans-serif;
+    font-weight:900;
+    font-size:13px;
+    color:var(--stamp-red);
+    border:2.5px solid var(--stamp-red);
+    border-radius:50%;
+    width:44px;
+    height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-14deg) scale(0.5);
+    opacity:0;
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1), opacity .15s;
+    letter-spacing:-1px;
+  }
+  .stamp-item.checked .stamp-btn{
+    border-color:#fff;
+  }
+  .stamp-item.checked .stamp-btn .mark{
+    opacity:1;
+    transform:rotate(-14deg) scale(1);
+  }
+  .item-body{
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .item-name{
+    font-size:15px;
+    font-weight:500;
+    color:var(--ink);
+    background:transparent;
+    border:none;
+    width:100%;
+    padding:2px 0;
+    font-family:"Noto Sans JP", sans-serif;
+  }
+  .item-name:focus{ outline:none; }
+  .item-name::placeholder{ color:#b6b09a; }
+  .item-remove{
+    flex:0 0 auto;
+    background:none;
+    border:none;
+    color:#c8c2a8;
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+    padding:6px;
+  }
+  .item-remove:hover{ color:var(--stamp-red); }
+
+  .add-row{
+    margin-top:14px;
+    display:flex;
+    gap:8px;
+  }
+  .add-row input{
+    flex:1;
+    border:1px dashed var(--panel-line);
+    background:var(--panel);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:14px;
+    font-family:"Noto Sans JP", sans-serif;
+    color:var(--ink);
+  }
+  .add-row input::placeholder{ color:var(--sub-ink); }
+  .add-row input:focus{ outline:none; border-color:var(--green-mid); }
+  .add-row button{
+    flex:0 0 auto;
+    background:var(--green-deep);
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:0 18px;
+    font-size:14px;
+    font-weight:700;
+    font-family:"Zen Maru Gothic", sans-serif;
+    cursor:pointer;
+  }
+  .add-row button:hover{ background:var(--green-mid); }
+
+  .toolbar{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-top:24px;
+    flex-wrap:wrap;
+  }
+  .reset-btn{
+    background:none;
+    border:1px solid var(--panel-line);
+    color:var(--sub-ink);
+    border-radius:99px;
+    padding:8px 18px;
+    font-size:12.5px;
+    cursor:pointer;
+    font-family:"Noto Sans JP", sans-serif;
+  }
+  .reset-btn:hover{ border-color:var(--stamp-red); color:var(--stamp-red); }
+  .install-btn{
+    background:var(--green-deep);
+    border:1px solid var(--green-deep);
+    color:#fff;
+    border-radius:99px;
+    padding:8px 18px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    font-family:"Noto Sans JP", sans-serif;
+  }
+  .install-btn:hover{ background:var(--green-mid); border-color:var(--green-mid); }
+
+  .install-guide{
+    position:fixed;
+    inset:0;
+    background:rgba(51,48,31,0.45);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:50;
+  }
+  .install-guide-inner{
+    position:relative;
+    background:#fff;
+    width:100%;
+    max-width:560px;
+    border-radius:20px 20px 0 0;
+    padding:24px 22px 30px;
+    font-size:14px;
+    line-height:1.8;
+    color:var(--ink);
+  }
+  .install-guide-inner b{ color:var(--green-deep); }
+  .install-guide-close{
+    position:absolute;
+    top:14px;
+    right:16px;
+    background:none;
+    border:none;
+    font-size:20px;
+    color:var(--sub-ink);
+    cursor:pointer;
+  }
+
+  .empty{
+    text-align:center;
+    color:var(--sub-ink);
+    font-size:13.5px;
+    padding:30px 10px;
+    border:1px dashed var(--panel-line);
+    border-radius:14px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .stamp-btn, .stamp-btn .mark, .progress-fill{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">CHECKLIST</div>
+    <h1 id="rallyName"></h1>
+  </header>
+
+  <div class="progress-card">
+    <div class="progress-top">
+      <div class="progress-label">達成状況</div>
+      <div class="progress-count"><span id="doneCount">0</span> / <span id="totalCount">0</span><span>スポット</span></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="complete-msg" id="completeMsg">🎉 コンプリート！お疲れさまでした</div>
+  </div>
+
+  <div class="list" id="list"></div>
+  <div class="empty" id="emptyMsg" style="display:none;">まだスポットがありません。下から追加してください。</div>
+
+  <div class="add-row">
+    <input type="text" id="newSpotInput" placeholder="新たなポケモンを追加" maxlength="40">
+    <button id="addSpotBtn">追加</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="install-btn" id="installBtn" style="display:none;">📱 ホーム画面に追加</button>
+    <button class="reset-btn" id="resetBtn">すべてリセット</button>
+  </div>
+
+  <div class="install-guide" id="installGuide" style="display:none;">
+    <div class="install-guide-inner">
+      <button class="install-guide-close" id="installGuideClose" aria-label="閉じる">×</button>
+      <div id="installGuideText"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = "stampRally.v1";
+  const listEl = document.getElementById("list");
+  const emptyMsg = document.getElementById("emptyMsg");
+  const rallyNameEl = document.getElementById("rallyName");
+  const doneCountEl = document.getElementById("doneCount");
+  const totalCountEl = document.getElementById("totalCount");
+  const progressFillEl = document.getElementById("progressFill");
+  const completeMsgEl = document.getElementById("completeMsg");
+  const newSpotInput = document.getElementById("newSpotInput");
+  const addSpotBtn = document.getElementById("addSpotBtn");
+  const resetBtn = document.getElementById("resetBtn");
+
+  const defaultSpots = [
+    "フシギダネ","ヒトカゲ","ゼニガメ","チコリータ","ヒノアラシ","ワニノコ",
+    "キモリ","アチャモ","ミズゴロウ","ナエトル","ヒコザル","ポッチャマ",
+    "ニャオハ","ホゲータ","クワッス",
+    "ミミッキュ","ピイ","ププリン","トゲピー","プクリン",
+    "シャワーズ","サンダース","ブースター","エーフィ―","ブラッキー","リーフィア","グレイシア","ニンフィア",
+    "メタモン（ピカチュウ寝）","ガルーラ",
+    "ゴース","ゴースト","ジジーロン",
+    "ディグタ","ダグトリオ",
+    "カボッチャ","デンヂムシ","アブリ","アブリボン",
+    "キュワワー","ツボツボ","アゴジムシ","カブトムシ",
+    "ウツドンン","バタフリー","キャタピー","コクーン",
+    "ウソッキー","ヤドカリ","ソーナンス","マネネ",
+    "ピチュ","リオル","クチート","プリン","ピカチュウ","イーブイ","メタモン（メタモン）",
+    "イシツブテ","アルクジラ","ユキカブリ","バリヤード","ヌマクロー",
+    "ハイリンダー","ローリンダー","エレズン","ミカルゲ",
+    "カビゴン（デザート）","カビゴン（カレー）","カビゴン（サラダ）"
+  ];
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){
+      console.error("読み込みエラー", e);
+      return null;
+    }
+  }
+
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){
+      console.error("保存エラー", e);
+    }
+  }
+
+  const DEFAULT_RALLY_NAME = "ポケモンねがおリサーチ＠ポケスリ3周年";
+
+  let state = loadState();
+  if(!state){
+    state = {
+      rallyName: DEFAULT_RALLY_NAME,
+      spots: defaultSpots.map((name, i) => ({
+        id: "s" + Date.now() + "_" + i,
+        name: name,
+        checked: false
+      }))
+    };
+    saveState();
+  }
+
+  function render(){
+    rallyNameEl.textContent = state.rallyName || DEFAULT_RALLY_NAME;
+
+    listEl.innerHTML = "";
+    if(state.spots.length === 0){
+      emptyMsg.style.display = "block";
+    } else {
+      emptyMsg.style.display = "none";
+    }
+
+    state.spots.forEach(spot => {
+      const item = document.createElement("div");
+      item.className = "stamp-item" + (spot.checked ? " checked" : "");
+
+      const btn = document.createElement("button");
+      btn.className = "stamp-btn";
+      btn.setAttribute("aria-label", spot.checked ? "チェック済み。タップで解除" : "タップでスタンプ");
+      const mark = document.createElement("div");
+      mark.className = "mark";
+      mark.textContent = "済";
+      btn.appendChild(mark);
+      btn.addEventListener("click", () => {
+        spot.checked = !spot.checked;
+        saveState();
+        render();
+      });
+
+      const body = document.createElement("div");
+      body.className = "item-body";
+
+      const nameInput = document.createElement("input");
+      nameInput.className = "item-name";
+      nameInput.value = spot.name;
+      nameInput.placeholder = "スポット名";
+      nameInput.maxLength = 40;
+      nameInput.addEventListener("input", () => {
+        spot.name = nameInput.value;
+        saveState();
+      });
+
+      body.appendChild(nameInput);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "item-remove";
+      removeBtn.setAttribute("aria-label", "削除");
+      removeBtn.textContent = "×";
+      removeBtn.addEventListener("click", () => {
+        state.spots = state.spots.filter(s => s.id !== spot.id);
+        saveState();
+        render();
+      });
+
+      item.appendChild(btn);
+      item.appendChild(body);
+      item.appendChild(removeBtn);
+      listEl.appendChild(item);
+    });
+
+    const total = state.spots.length;
+    const done = state.spots.filter(s => s.checked).length;
+    totalCountEl.textContent = total;
+    doneCountEl.textContent = done;
+    const pct = total === 0 ? 0 : Math.round((done/total)*100);
+    progressFillEl.style.width = pct + "%";
+    completeMsgEl.classList.toggle("show", total > 0 && done === total);
+  }
+
+  function addSpot(){
+    const val = newSpotInput.value.trim();
+    if(!val) return;
+    state.spots.push({
+      id: "s" + Date.now() + "_" + Math.random().toString(36).slice(2,6),
+      name: val,
+      checked: false
+    });
+    newSpotInput.value = "";
+    saveState();
+    render();
+  }
+
+  addSpotBtn.addEventListener("click", addSpot);
+  newSpotInput.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") addSpot();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if(!confirm("すべてのチェックとスポット名をリセットします。よろしいですか？")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    state = {
+      rallyName: DEFAULT_RALLY_NAME,
+      spots: defaultSpots.map((name, i) => ({
+        id: "s" + Date.now() + "_" + i,
+        name: name,
+        checked: false
+      }))
+    };
+    saveState();
+    render();
+  });
+
+  render();
+
+  // ===== ホーム画面に追加 =====
+  const installBtn = document.getElementById("installBtn");
+  const installGuide = document.getElementById("installGuide");
+  const installGuideText = document.getElementById("installGuideText");
+  const installGuideClose = document.getElementById("installGuideClose");
+
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(ua);
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+  let deferredPrompt = null;
+
+  function openGuide(html){
+    installGuideText.innerHTML = html;
+    installGuide.style.display = "flex";
+  }
+  function closeGuide(){
+    installGuide.style.display = "none";
+  }
+  installGuideClose.addEventListener("click", closeGuide);
+  installGuide.addEventListener("click", (e) => {
+    if(e.target === installGuide) closeGuide();
+  });
+
+  if(!isStandalone){
+    installBtn.style.display = "inline-block";
+  }
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if(deferredPrompt){
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      return;
+    }
+    if(isIOS){
+      openGuide(
+        "<b>ホーム画面に追加（iPhone / iPad）</b><br><br>" +
+        "① 画面下（Safariの場合）または上部の共有アイコン <b>［共有］</b> をタップ<br>" +
+        "② メニューから <b>「ホーム画面に追加」</b> を選択<br>" +
+        "③ 右上の <b>「追加」</b> をタップ<br><br>" +
+        "ホーム画面のアイコンから開くと、ブラウザのアドレスバーなしで使えます。データはそのまま引き継がれます。"
+      );
+    } else if(isAndroid){
+      openGuide(
+        "<b>ホーム画面に追加（Android）</b><br><br>" +
+        "① 右上の <b>︙（メニュー）</b> をタップ<br>" +
+        "② <b>「ホーム画面に追加」</b> または <b>「アプリをインストール」</b> を選択<br>" +
+        "③ 案内に従って追加<br><br>" +
+        "ホーム画面のアイコンから開くと、データはそのまま引き継がれます。"
+      );
+    } else {
+      openGuide(
+        "<b>ホーム画面に追加</b><br><br>" +
+        "お使いのブラウザのメニューから「アプリをインストール」または「ホーム画面に追加」を選択してください。<br><br>" +
+        "スマートフォンで開いた場合は、ブラウザの共有メニューまたは︙メニューから追加できます。"
+      );
+    }
+  });
+})();
+</script>
+</body>
+</html>

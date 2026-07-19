@@ -1,0 +1,16 @@
+{
+  "name": "ポケモンねがおリサーチ＠ポケスリ3周年",
+  "short_name": "スタンプラリー",
+  "start_url": "./stamp-rally.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3f6b4f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
